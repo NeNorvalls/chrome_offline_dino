@@ -4,6 +4,7 @@ let dinoWidth = 88, dinoHeight = 94, dinoX = 50, dinoY = boardHeight - dinoHeigh
 let dino = { x: dinoX, y: dinoY, width: dinoWidth, height: dinoHeight };
 let cactusArray = [], velocityX = -8, velocityY = 0, gravity = 0.4;
 let gameOver = false, score = 0;
+let restartButton;
 
 const cactusTypes = [
     { imgSrc: "./img/cactus1.png", width: 34, height: 70 },
@@ -16,14 +17,22 @@ window.onload = function() {
     board.height = boardHeight;
     board.width = boardWidth;
     context = board.getContext("2d"); 
+    console.log("Board and context initialized"); 
 
     dinoImg = loadImage("./img/dino.png", () => drawImage(dinoImg, dino));
+    console.log("Dino image loaded"); 
 
     cactus1Img = loadImage(cactusTypes[0].imgSrc);
     cactus2Img = loadImage(cactusTypes[1].imgSrc);
     cactus3Img = loadImage(cactusTypes[2].imgSrc);
+    console.log("Cactus images loaded"); 
+
+    restartButton = document.getElementById("restartButton");
+    restartButton.addEventListener("click", restartGame);
+    console.log("Restart button initialized"); 
 
     requestAnimationFrame(update);
+    console.log("Game started"); 
     setInterval(placeCactus, 1000);
     document.addEventListener("keydown", moveDino);
 }
@@ -46,22 +55,34 @@ function update() {
 
     velocityY += gravity;
     dino.y = Math.min(dino.y + velocityY, dinoY);
+    console.log("Dino position:", dino.x, dino.y); 
     drawImage(dinoImg, dino);
 
     for (let cactus of cactusArray) {
         cactus.x += velocityX;
+        console.log("Cactus position:", cactus.x, cactus.y); 
         drawImage(cactus.img, cactus);
         if (detectCollision(dino, cactus)) endGame();
     }
 
+    score++;
+    console.log("Score:", score);
     context.fillStyle = "black";
     context.font = "20px courier";
-    context.fillText(++score, 5, 20);
+    context.fillText(`Score: ${score}`, 5, 20); 
+
+    if (gameOver) {
+        context.fillStyle = "red";
+        context.font = "40px courier";
+        context.fillText("Game Over", boardWidth / 2 - 100, boardHeight / 2);
+        console.log("Game Over"); 
+    }
 }
 
 function moveDino(e) {
     if (gameOver || dino.y != dinoY) return;
     if (e.code === "Space" || e.code === "ArrowUp") velocityY = -10;
+    console.log("Dino jumped");
 }
 
 function placeCactus() {
@@ -80,6 +101,7 @@ function placeCactus() {
     });
 
     if (cactusArray.length > 5) cactusArray.shift();
+    console.log("Cactus placed"); 
 }
 
 function detectCollision(a, b) {
@@ -95,40 +117,13 @@ function endGame() {
     dinoImg.onload = () => drawImage(dinoImg, dino);
 }
 
-// Variables Initialization
-// Declares variables to store references to various elements and images
-// Sets the dimensions of the game board
-// Defines the dimensions and initial position of the dinosaur character
-// Creates an object representing the dinosaur character
-// Initializes variables for managing cacti and their movement, as well as gravity
-// Flags to track the game state and the player's score
+function restartGame() {
+    score = 0;
+    cactusArray = [];
+    velocityY = 0;
+    gameOver = false;
+    dinoImg.src = "./img/dino.png";
+    dinoImg.onload = () => drawImage(dinoImg, dino);
+    requestAnimationFrame(update);
+}
 
-// Cactus Types
-// Defines an array of objects representing different types of cacti, including their image sources and dimensions
-
-// Initialization Function
-// Runs the specified code once the webpage has finished loading
-// Retrieves the game board element and sets its dimensions
-// Loads images for the dinosaur and cacti using the loadImage function
-// Listens for keydown events to control the dinosaur's movement
-// Initiates the game loop using requestAnimationFrame and schedules cacti placement using setInterval
-
-// Utility Functions
-// Loads an image from the specified source and calls the provided callback function once the image is loaded
-// Draws an image onto the canvas at the specified coordinates and dimensions
-
-// Game Loop Function
-// Updates the game state and renders the game objects
-// Adjusts the dinosaur's position based on gravity and user input
-// Moves and renders each cactus, checking for collisions with the dinosaur
-// Updates and displays the player's score
-
-// Event Handling Functions
-// Handles key presses to control the dinosaur's jumping
-// Places new cacti on the game board at random intervals
-
-// Collision Detection Function
-// Checks if two objects collide by comparing their positions and dimensions
-
-// Game Over Function
-// Ends the game when the dinosaur collides with a cactus, updates the dinosaur's image, and stops further gameplay
